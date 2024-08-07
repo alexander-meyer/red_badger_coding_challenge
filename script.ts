@@ -36,10 +36,15 @@ function handleClick() {
   const [robotX, robotY, robotDirection] = instructions[1].split(" ");
   robot = setUpRobot(robotX, robotY, robotDirection);
 
+  const commands = instructions[2].split("");
+  commands.forEach((command) => {
+    robot = updateRobot(robot, command);
+  });
+
   const outputElement = document.getElementById(
     "output"
   ) as HTMLParagraphElement;
-  outputElement.innerText = JSON.stringify(robot);
+  outputElement.innerText = `${robot.xPosition} ${robot.yPosition} ${robot.direction}`;
 }
 
 function calculateForwardCoordinate(
@@ -57,6 +62,58 @@ function calculateForwardCoordinate(
     case Directions.W:
       return [x - 1, y];
   }
+}
+
+function updateRobot(robot: Robot, command: string): Robot {
+  switch (command) {
+    case "F":
+      robot.xPosition = robot.forwardCoordinate[0];
+      robot.yPosition = robot.forwardCoordinate[1];
+
+      robot.forwardCoordinate = calculateForwardCoordinate(
+        robot.xPosition,
+        robot.yPosition,
+        robot.direction as Directions
+      );
+      break;
+    case "L":
+      robot.direction = calculateNewDirection(
+        robot.direction as Directions,
+        "L"
+      );
+      robot.forwardCoordinate = calculateForwardCoordinate(
+        robot.xPosition,
+        robot.yPosition,
+        robot.direction as Directions
+      );
+      break;
+    case "R":
+      robot.direction = calculateNewDirection(
+        robot.direction as Directions,
+        "R"
+      );
+      robot.forwardCoordinate = calculateForwardCoordinate(
+        robot.xPosition,
+        robot.yPosition,
+        robot.direction as Directions
+      );
+      break;
+  }
+
+  return robot;
+}
+
+function calculateNewDirection(
+  currentDirection: Directions,
+  rotation: "L" | "R"
+): Directions {
+  const directionValues = Object.values(Directions) as Directions[];
+  const currentIndex = directionValues.indexOf(currentDirection);
+  const newIndex =
+    (rotation === "L" ? currentIndex - 1 : currentIndex + 1) %
+    directionValues.length;
+
+  return directionValues[newIndex];
 }
 
 function buildGrid(upperXIndex: number, upperYIndex: number): Grid {

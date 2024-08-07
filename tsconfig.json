@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "commonjs",
+    "strict": true,
+    "esModuleInterop": true,
+    "outDir": "./dist",
+    "lib": ["es2017", "dom"] // Add this line
+  },
+  "include": ["*.ts"],
+  "files": ["script.ts"] // Add your input file(s) here
+}
