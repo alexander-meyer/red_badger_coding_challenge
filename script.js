@@ -1,3 +1,10 @@
+var Directions;
+(function (Directions) {
+    Directions["N"] = "N";
+    Directions["E"] = "E";
+    Directions["S"] = "S";
+    Directions["W"] = "W";
+})(Directions || (Directions = {}));
 function handleClick() {
     var grid;
     var robot;
@@ -12,6 +19,18 @@ function handleClick() {
     robot = setUpRobot(robotX, robotY, robotDirection);
     var outputElement = document.getElementById("output");
     outputElement.innerText = JSON.stringify(robot);
+}
+function calculateForwardCoordinate(x, y, direction) {
+    switch (direction) {
+        case Directions.N:
+            return [x, y + 1];
+        case Directions.E:
+            return [x + 1, y];
+        case Directions.S:
+            return [x, y - 1];
+        case Directions.W:
+            return [x - 1, y];
+    }
 }
 function buildGrid(upperXIndex, upperYIndex) {
     // Because the user input for grid size references the index, not the size, we need to add 1 here to get the actual grid size
@@ -31,10 +50,13 @@ function setUpRobot(x, y, direction) {
     // TODO: validate x and y
     var xPosition = parseInt(x);
     var yPosition = parseInt(y);
+    // TODO: validate directions
+    var forwardCoordinate = calculateForwardCoordinate(xPosition, yPosition, direction);
     return {
         xPosition: xPosition,
         yPosition: yPosition,
         direction: direction,
+        forwardCoordinate: forwardCoordinate,
         isLost: false,
     };
 }

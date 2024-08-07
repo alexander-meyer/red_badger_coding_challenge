@@ -9,8 +9,16 @@ type Robot = {
   xPosition: number;
   yPosition: number;
   direction: string;
+  forwardCoordinate: number[];
   isLost: boolean;
 };
+
+enum Directions {
+  N = "N",
+  E = "E",
+  S = "S",
+  W = "W",
+}
 
 function handleClick() {
   let grid: Grid;
@@ -32,6 +40,23 @@ function handleClick() {
     "output"
   ) as HTMLParagraphElement;
   outputElement.innerText = JSON.stringify(robot);
+}
+
+function calculateForwardCoordinate(
+  x: number,
+  y: number,
+  direction: Directions
+) {
+  switch (direction) {
+    case Directions.N:
+      return [x, y + 1];
+    case Directions.E:
+      return [x + 1, y];
+    case Directions.S:
+      return [x, y - 1];
+    case Directions.W:
+      return [x - 1, y];
+  }
 }
 
 function buildGrid(upperXIndex: number, upperYIndex: number): Grid {
@@ -57,10 +82,18 @@ function setUpRobot(x: string, y: string, direction: string): Robot {
   const xPosition = parseInt(x);
   const yPosition = parseInt(y);
 
+  // TODO: validate directions
+  const forwardCoordinate = calculateForwardCoordinate(
+    xPosition,
+    yPosition,
+    direction as Directions
+  );
+
   return {
     xPosition,
     yPosition,
     direction,
+    forwardCoordinate,
     isLost: false,
   };
 }
