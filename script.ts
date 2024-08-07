@@ -28,9 +28,7 @@ function handleClick() {
   // TODO: validate input
   const instructions = input.value.split("\n");
 
-  const [gridLength, gridHeight] = instructions[0]
-    .split(" ")
-    .map((str) => parseInt(str));
+  const [gridLength, gridHeight] = instructions[0].split(" ").map((str) => parseInt(str));
   grid = buildGrid(gridLength, gridHeight);
 
   const [robotX, robotY, robotDirection] = instructions[1].split(" ");
@@ -38,13 +36,16 @@ function handleClick() {
 
   const commands = instructions[2].split("");
   commands.forEach((command) => {
-    robot = updateRobot(robot, command);
+    if (robot.isLost) {
+      return;
+    }
+    ({ grid, robot } = updateSystem(grid, robot, command));
   });
 
   const outputElement = document.getElementById(
     "output"
   ) as HTMLParagraphElement;
-  outputElement.innerText = `${robot.xPosition} ${robot.yPosition} ${robot.direction}`;
+  outputElement.innerText = `${robot.xPosition} ${robot.yPosition} ${robot.direction} ${robot.isLost ? "LOST" : ""}`;
 }
 
 function calculateForwardCoordinate(
@@ -64,9 +65,23 @@ function calculateForwardCoordinate(
   }
 }
 
-function updateRobot(robot: Robot, command: string): Robot {
+function updateSystem(
+  grid: Grid,
+  robot: Robot,
+  command: string
+): { grid: Grid; robot: Robot } {
   switch (command) {
     case "F":
+      if (
+        isOffGrid(grid, robot.forwardCoordinate[0], robot.forwardCoordinate[1])
+      ) {
+        robot.isLost = true;
+        grid[robot.xPosition][robot.yPosition].hasLostScent = true;
+        grid[robot.xPosition][robot.yPosition].lostDirections.push(
+          robot.forwardCoordinate
+        );
+        break;
+      }
       robot.xPosition = robot.forwardCoordinate[0];
       robot.yPosition = robot.forwardCoordinate[1];
 
@@ -100,7 +115,11 @@ function updateRobot(robot: Robot, command: string): Robot {
       break;
   }
 
-  return robot;
+  return { grid, robot };
+}
+
+function isOffGrid(grid: Grid, x: number, y: number) {
+  return x < 0 || y < 0 || x >= grid.length || y >= grid[0].length;
 }
 
 function calculateNewDirection(

@@ -12,18 +12,19 @@ function handleClick() {
     const input = document.getElementById("input");
     // TODO: validate input
     const instructions = input.value.split("\n");
-    const [gridLength, gridHeight] = instructions[0]
-        .split(" ")
-        .map((str) => parseInt(str));
+    const [gridLength, gridHeight] = instructions[0].split(" ").map((str) => parseInt(str));
     grid = buildGrid(gridLength, gridHeight);
     const [robotX, robotY, robotDirection] = instructions[1].split(" ");
     robot = setUpRobot(robotX, robotY, robotDirection);
     const commands = instructions[2].split("");
     commands.forEach((command) => {
-        robot = updateRobot(robot, command);
+        if (robot.isLost) {
+            return;
+        }
+        ({ grid, robot } = updateSystem(grid, robot, command));
     });
     const outputElement = document.getElementById("output");
-    outputElement.innerText = `${robot.xPosition} ${robot.yPosition} ${robot.direction}`;
+    outputElement.innerText = `${robot.xPosition} ${robot.yPosition} ${robot.direction} ${robot.isLost ? "LOST" : ""}`;
 }
 function calculateForwardCoordinate(x, y, direction) {
     switch (direction) {
@@ -37,9 +38,15 @@ function calculateForwardCoordinate(x, y, direction) {
             return [x - 1, y];
     }
 }
-function updateRobot(robot, command) {
+function updateSystem(grid, robot, command) {
     switch (command) {
         case "F":
+            if (isOffGrid(grid, robot.forwardCoordinate[0], robot.forwardCoordinate[1])) {
+                robot.isLost = true;
+                grid[robot.xPosition][robot.yPosition].hasLostScent = true;
+                grid[robot.xPosition][robot.yPosition].lostDirections.push(robot.forwardCoordinate);
+                break;
+            }
             robot.xPosition = robot.forwardCoordinate[0];
             robot.yPosition = robot.forwardCoordinate[1];
             robot.forwardCoordinate = calculateForwardCoordinate(robot.xPosition, robot.yPosition, robot.direction);
@@ -53,7 +60,10 @@ function updateRobot(robot, command) {
             robot.forwardCoordinate = calculateForwardCoordinate(robot.xPosition, robot.yPosition, robot.direction);
             break;
     }
-    return robot;
+    return { grid, robot };
+}
+function isOffGrid(grid, x, y) {
+    return x < 0 || y < 0 || x >= grid.length || y >= grid[0].length;
 }
 function calculateNewDirection(currentDirection, rotation) {
     const directionValues = Object.values(Directions);
