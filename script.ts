@@ -1,51 +1,31 @@
-type Grid = GridSquare[][];
-
-type GridSquare = {
-  lostDirections: number[][];
-  hasLostScent: boolean;
-};
-
-type Robot = {
-  xPosition: number;
-  yPosition: number;
-  direction: string;
-  forwardCoordinate: number[];
-  isLost: boolean;
-};
-
-enum Directions {
-  N = "N",
-  E = "E",
-  S = "S",
-  W = "W",
-}
-
 function handleClick() {
   let grid: Grid;
-  let robot: Robot;
-
-  const input = document.getElementById("input") as HTMLTextAreaElement;
-  // TODO: validate input
-  const instructions = input.value.split("\n");
-
-  const [gridLength, gridHeight] = instructions[0].split(" ").map((str) => parseInt(str));
-  grid = buildGrid(gridLength, gridHeight);
-
-  const [robotX, robotY, robotDirection] = instructions[1].split(" ");
-  robot = setUpRobot(robotX, robotY, robotDirection);
-
-  const commands = instructions[2].split("");
-  commands.forEach((command) => {
-    if (robot.isLost) {
-      return;
-    }
-    ({ grid, robot } = updateSystem(grid, robot, command));
-  });
 
   const outputElement = document.getElementById(
     "output"
   ) as HTMLParagraphElement;
-  outputElement.innerText = `${robot.xPosition} ${robot.yPosition} ${robot.direction} ${robot.isLost ? "LOST" : ""}`;
+  const inputElement = document.getElementById("input") as HTMLTextAreaElement;
+  // TODO: validate input
+  const userInput = inputElement.value.split("\n");
+
+  const [gridLength, gridHeight] = userInput[0].split(" ").map((str) => parseInt(str));
+  grid = buildGrid(gridLength, gridHeight);
+
+  // Get each pair of instructions for the robot
+  for (let i = 1; i < userInput.length; i += 2) {
+    const [robotX, robotY, robotDirection] = userInput[i].split(" ");
+    let newRobot = setUpRobot(robotX, robotY, robotDirection);
+    const commands = userInput[i + 1].split("");
+
+    commands.forEach((command) => {
+      if (newRobot.isLost) {
+        return;
+      }
+      ({ grid, robot: newRobot } = updateSystem(grid, newRobot, command));
+    });
+
+    outputElement.innerText += `${newRobot.xPosition} ${newRobot.yPosition} ${newRobot.direction} ${newRobot.isLost ? "LOST" : ""} \n`;
+  }
 }
 
 function calculateForwardCoordinate(
@@ -68,10 +48,21 @@ function calculateForwardCoordinate(
 function updateSystem(
   grid: Grid,
   robot: Robot,
-  command: string
+  command: string,
 ): { grid: Grid; robot: Robot } {
   switch (command) {
     case "F":
+      const hasLostScent = grid[robot.xPosition][robot.yPosition].hasLostScent;
+
+      const forwardCoordStr = JSON.stringify(robot.forwardCoordinate);
+      const includesForwardCoord = grid[robot.xPosition][robot.yPosition].lostDirections.some(coord => JSON.stringify(coord) === forwardCoordStr);
+
+      // For some reason, this code does not seem to work as expected; it is borking up the robot's direction and forwardCoordinate properties :/
+
+      // if (hasLostScent && includesForwardCoord) {
+      //   break;
+      // }
+
       if (
         isOffGrid(grid, robot.forwardCoordinate[0], robot.forwardCoordinate[1])
       ) {
@@ -172,4 +163,28 @@ function setUpRobot(x: string, y: string, direction: string): Robot {
     forwardCoordinate,
     isLost: false,
   };
+}
+
+// tried to put types in a separate file but compiler was complaining :'( 
+
+type Grid = GridSquare[][];
+
+type GridSquare = {
+  lostDirections: number[][];
+  hasLostScent: boolean;
+};
+
+type Robot = {
+  xPosition: number;
+  yPosition: number;
+  direction: string;
+  forwardCoordinate: number[];
+  isLost: boolean;
+};
+
+enum Directions {
+  N = "N",
+  E = "E",
+  S = "S",
+  W = "W",
 }
