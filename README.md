@@ -2,6 +2,13 @@
 
 This was an interesting puzzle to tackle, with a couple of tricky pieces to consider.
 
+## To run
+
+1. Clone the repo locally
+2. Open `index.html` in your web browser, and you should see the following:
+
+<img width="455" alt="Screenshot 2024-08-07 at 4 49 38 PM" src="https://github.com/user-attachments/assets/edf745a2-6639-4554-8406-81742ebf36e4">
+
 ## Decisions
 Since the UI/UX was not the primary focus, and since we weren't operating a server of any kind, I opted to go for a vanilla `.ts`/`.html` approach, since I thought that React would be overkill. In hindsight, I'd forgotten how irksome it could be to deal with TS config settings, so I wish I'd just gone with a framework. It would have simplified the organization of functions and files too, allowing for easier export (I couldn't get around the TS compilation issues when trying to move custom types into their own file).
 
@@ -9,9 +16,9 @@ Looking at the grid system, I figured that a simple 2-D array would suffice. The
 - does it have a scent?
 - if it has a scent, to which movable coordinates does this scent pertain?
 
-NOTE: upon writing this out, I feel like these could have been collapsed to a single property (e.g. `scentDirection`, which could be N, E, S, W, or `null`). This would greatly simplify things
+NOTE: upon writing this out, I feel like these could have been collapsed to a single property (e.g. `scentDirection`, which could be N, E, S, W, or `null`). This would greatly simplify things. Also upon writing this out, I feel like perhaps we would want to store whether a robot is present on a grid square for the edge case of overlap (this is expanded upon down below)
 
-THe other part of our program is the robot. Rather than building a class, I decided to go for another object, though with the amount of logic that was necessary, perhaps a class would have been better suited to handle all the methods.
+The other part of our program is the robot. Rather than building a class, I decided to go for another object, though with the amount of logic that was necessary, perhaps a class would have been better suited to handle all the methods.
 
 We want to store on a particular robot:
 - its coordinates
